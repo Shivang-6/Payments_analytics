@@ -1,0 +1,34 @@
+# .github/workflows/validate.yml
+name: Data Validation Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-schema:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pandas
+
+      - name: Generate Dummy Data for Testing
+        run: |
+          mkdir -p data/raw
+          echo "customer_id,email,phone,age,price,birth_date,start_date,end_date" > data/raw/unvalidated_customers.csv
+          echo "CUST-001,test@example.com,1234567890,30,150.00,1995-05-15,2026-01-01,2026-12-31" >> data/raw/unvalidated_customers.csv
+          echo "CUST-002,admin@stark.com,9876543210,45,2500.00,1980-10-22,2026-02-01,2026-11-30" >> data/raw/unvalidated_customers.csv
+
+      - name: Run Schema Validation
+        run: python scripts/validate_data.py
